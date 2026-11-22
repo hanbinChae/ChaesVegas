@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>♠ 채스베이거스 홀덤 나이트</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='32' fill='%230f2b20'/><circle cx='32' cy='32' r='28' fill='none' stroke='%23c9a24a' stroke-width='2'/><text x='32' y='45' font-family='Georgia,serif' font-size='38' font-weight='900' text-anchor='middle' fill='%23e6c36a'>C</text></svg>">
+  <title>채스베이거스</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='32' fill='%230f2b20'/><circle cx='32' cy='32' r='28' fill='none' stroke='%23c9a24a' stroke-width='2'/><path d='M32 9C32 9 13 24 13 36C13 44 19 49 25 49C28 49 30.5 47.5 31.5 45.5C31 50.5 29.5 54 26 57H38C34.5 54 33 50.5 32.5 45.5C33.5 47.5 36 49 39 49C45 49 51 44 51 36C51 24 32 9 32 9Z' fill='%23e6c36a'/><text x='32' y='42' font-family='Georgia,serif' font-size='22' font-weight='900' text-anchor='middle' fill='%230f2b20'>C</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
@@ -729,35 +729,37 @@ function PlayerSetupScreen({ onStart }) {
   return (
     <div className="min-h-screen flex flex-col items-center">
       <HeroHeader status={`${count}명 · 스택 ${fmt(stackVal)} · 약 3시간`} />
-      <div className="panel panel-gold w-full max-w-lg p-6 m-4">
-        <div className="eyebrow mb-1">Table Setup</div>
-        <h2 className="serif text-2xl font-black gold-text mb-1">플레이어 설정</h2>
-        <div className="divider mb-4" />
+      <div className="panel panel-gold w-full max-w-5xl p-6 md:p-8 m-4">
+        <div className="eyebrow mb-1" style={{fontSize:'.8rem'}}>Table Setup</div>
+        <h2 className="serif text-3xl font-black gold-text mb-2">플레이어 설정</h2>
+        <div className="divider mb-5" />
         {/* Player Count */}
-        <div className="flex items-center gap-2 mb-4 flex-wrap">
-          <span className="text-slate-300 text-sm font-medium">인원 수:</span>
+        <div className="flex items-center gap-2 mb-5 flex-wrap">
+          <span className="text-slate-300 text-base font-medium">인원 수:</span>
           {[2,3,4,5,6,7,8].map(n=>(
             <button key={n} onClick={()=>updateCount(n)}
-              className={`btn btn-sm ${count===n?'bg-yellow-500 text-black font-black':'bg-slate-700 text-white'}`}>
+              className={`btn btn-md ${count===n?'bg-yellow-500 text-black font-black':'bg-slate-700 text-white'}`}>
               {n}명
             </button>
           ))}
         </div>
+        <div className="grid gap-5 md:grid-cols-2 md:items-stretch mb-5">
         {/* Player Names — 테이블 배치 (대시보드 테이블 뷰와 동일한 좌석 순서) */}
-        <div className="text-xs text-slate-400 mb-1 text-center">좌석 순서대로 이름을 입력하세요 (1번 = 딜러 시작 · 은행)</div>
-        <div className="relative w-full mx-auto mb-4" style={{aspectRatio:'4 / 3', maxWidth:480}}>
+        <div className="min-w-0">
+        <div className="text-sm text-slate-400 mb-2 text-center">좌석 순서대로 이름을 입력하세요 (1번 = 딜러 시작 · 은행)</div>
+        <div className="relative w-full mx-auto" style={{aspectRatio:'4 / 3', maxWidth:560}}>
           <div className="absolute rounded-[50%] felt-table" style={{inset:'14% 12%'}} />
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="eyebrow" style={{color:'rgba(243,220,155,.8)'}}>{count} Seats</div>
           </div>
           {names.map((name,i)=>{
             const ang = Math.PI/2 + (i*2*Math.PI)/count;
-            const pos = { left:`${50+40*Math.cos(ang)}%`, top:`${50+38*Math.sin(ang)}%` };
+            const pos = { left:`${50+38*Math.cos(ang)}%`, top:`${50+38*Math.sin(ang)}%`, width:'clamp(76px, 20%, 112px)' };
             return (
               <div key={i} className="absolute -translate-x-1/2 -translate-y-1/2" style={pos}>
-                <div className="text-center" style={{width:84}}>
-                  <div className="text-[10px] font-bold" style={{color:'rgba(243,220,155,.9)'}}>{i+1}{i===0?' · BTN':''}</div>
-                  <input className="w-full bg-slate-900 text-white rounded-lg px-1 py-1 border border-slate-600 text-xs text-center"
+                <div className="text-center w-full">
+                  <div className="text-xs font-bold mb-0.5" style={{color:'rgba(243,220,155,.9)'}}>{i+1}{i===0?' · BTN':''}</div>
+                  <input className="w-full bg-slate-900 text-white rounded-lg px-2 py-2 border border-slate-600 text-base text-center"
                     value={name} onChange={e=>{const n=[...names];n[i]=e.target.value;setNames(n);}}
                     placeholder={`플레이어 ${i+1}`} maxLength={10} />
                 </div>
@@ -765,38 +767,40 @@ function PlayerSetupScreen({ onStart }) {
             );
           })}
         </div>
+        </div>
         {/* Chip Allocation Display */}
-        <div className="bg-slate-900 rounded-xl p-4 mb-4 border border-slate-700">
-          <div className="text-sm font-bold text-slate-300 mb-2">
+        <div className="bg-slate-900 rounded-xl p-5 border border-slate-700 min-w-0 md:flex md:flex-col md:justify-center">
+          <div className="text-base font-bold text-slate-300 mb-3">
             1인당 지급 칩 (스택: {fmt(stackVal)})
           </div>
-          <div className="flex flex-wrap gap-2 mb-3">
+          <div className="flex flex-wrap gap-3 mb-4">
             {CHIP_TYPES.map(ct=>(
-              <div key={ct.key} className="flex items-center gap-1">
-                <span className={`badge ${ct.colorClass} text-xs`}>{alloc[ct.key]}개</span>
-                <span className="text-slate-400 text-xs">× {fmt(ct.value)}</span>
+              <div key={ct.key} className="flex items-center gap-1.5">
+                <span className={`badge ${ct.colorClass} text-sm`} style={{padding:'3px 10px'}}>{alloc[ct.key]}개</span>
+                <span className="text-slate-400 text-sm">× {fmt(ct.value)}</span>
               </div>
             ))}
           </div>
-          <div className="text-xs font-bold text-slate-400 mb-1">블라인드 (레벨당 60분)</div>
-          <div className="flex flex-wrap gap-x-3 gap-y-1 mb-3 text-xs text-yellow-300">
+          <div className="text-sm font-bold text-slate-400 mb-1.5">블라인드 (레벨당 60분)</div>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 mb-4 text-sm text-yellow-300">
             {BLIND_LEVELS_BY_COUNT[count].map((l,i)=>(
               <span key={i}>Lv.{i+1} {l.sb.toLocaleString()}/{l.bb.toLocaleString()}</span>
             ))}
           </div>
-          <div className="text-xs font-bold text-slate-400 mb-1">은행 잔여 재고</div>
-          <div className="flex flex-wrap gap-2">
+          <div className="text-sm font-bold text-slate-400 mb-1.5">은행 잔여 재고</div>
+          <div className="flex flex-wrap gap-3">
             {CHIP_TYPES.map(ct=>(
-              <div key={ct.key} className="flex items-center gap-1">
-                <span className={`badge ${ct.colorClass} text-xs`}>{bank[ct.key]}개</span>
-                <span className="text-slate-500 text-xs">{ct.label}</span>
+              <div key={ct.key} className="flex items-center gap-1.5">
+                <span className={`badge ${ct.colorClass} text-sm`} style={{padding:'3px 10px'}}>{bank[ct.key]}개</span>
+                <span className="text-slate-500 text-sm">{ct.label}</span>
               </div>
             ))}
           </div>
-          <div className="text-xs text-slate-500 mt-1">은행 총 가치: {fmt(chipValue(bank))}</div>
+          <div className="text-sm text-slate-500 mt-2">은행 총 가치: {fmt(chipValue(bank))}</div>
+        </div>
         </div>
         <button onClick={()=>onStart(names.filter(n=>n.trim()),count)}
-          className="btn btn-lg bg-yellow-500 hover:bg-yellow-400 text-black font-black w-full text-lg tracking-widest">
+          className="btn bg-yellow-500 hover:bg-yellow-400 text-black font-black w-full text-xl tracking-widest" style={{padding:'1rem 1.5rem'}}>
           ♠ 게임 시작
         </button>
       </div>
