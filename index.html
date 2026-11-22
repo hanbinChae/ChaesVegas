@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>♠ 채스베이거스 홀덤 나이트</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            slate: { 950: '#0F172A', 900: '#0f1b2d', 800: '#1e293b', 700: '#334155' },
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; background: #0F172A; font-family: 'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', system-ui, sans-serif; overflow-x: hidden; letter-spacing:-.01em; -webkit-font-smoothing: antialiased; }
+    .chip-black  { background: #1E1E1E; color: #fff; border: 2px solid #888; }
+    .chip-green  { background: #10B981; color: #fff; border: 2px solid #059669; }
+    .chip-red    { background: #EF4444; color: #fff; border: 2px solid #DC2626; }
+    .chip-sky    { background: #0EA5E9; color: #fff; border: 2px solid #0284C7; }
+    @keyframes pulse-ring { 0%{transform:scale(1);opacity:1} 50%{transform:scale(1.08);opacity:.7} 100%{transform:scale(1);opacity:1} }
+    .pulse { animation: pulse-ring 1s ease-in-out infinite; }
+    @keyframes flash-warn { 0%,100%{background:#7f1d1d} 50%{background:#ef4444} }
+    .flash-warn { animation: flash-warn .8s ease-in-out infinite; }
+    .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:50;display:flex;align-items:center;justify-content:center;padding:1rem; }
+    .scrollable { overflow-y: auto; max-height: 80vh; }
+    input[type=number]::-webkit-inner-spin-button { opacity:1; }
+    .badge { display:inline-flex;align-items:center;justify-content:center;border-radius:9999px;font-weight:700;font-size:.7rem;padding:2px 8px;min-width:28px; }
+    .btn { cursor:pointer;border:none;border-radius:.5rem;font-weight:600;transition:all .15s;display:inline-flex;align-items:center;gap:.3rem;justify-content:center; }
+    .btn:active { transform:scale(.96); }
+    .btn-sm { padding:.3rem .7rem;font-size:.8rem; }
+    .btn-md { padding:.5rem 1.1rem;font-size:.9rem; }
+    .btn-lg { padding:.7rem 1.5rem;font-size:1rem; }
+    ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:#1e293b; } ::-webkit-scrollbar-thumb { background:#475569;border-radius:3px; }
+    /* ??? THEME: ?????? ? ?? ?? ? ??? ?? ??? */
+    :root {
+      --felt-950:#0f2b20; --felt-900:#15382a; --felt-800:#1b4535; --felt-700:#255a44; --felt-600:#306f55;
+      --gold-300:#f3dc9b; --gold-400:#e6c36a; --gold-500:#c9a24a; --gold-700:#8a6d2b;
+      --ivory:#f6efdc; --ivory-dim:rgba(246,239,220,.62); --line:rgba(230,195,106,.22);
+      --serif:'Noto Serif KR','Nanum Myeongjo','Batang','Times New Roman',serif;
+    }
+    body { background: var(--felt-950); color: var(--ivory); }
+    body::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+      background:
+        radial-gradient(1000px 560px at 50% -10%, rgba(64,136,102,.5), transparent 70%),
+        radial-gradient(600px 400px at 100% 100%, rgba(201,162,74,.08), transparent 70%),
+        repeating-linear-gradient(45deg, rgba(255,255,255,.012) 0 2px, transparent 2px 6px); }
+
+    /* ?? slate/? ???? ?? ??? ??? */
+    .bg-slate-950 { background-color: var(--felt-950) !important; }
+    .bg-slate-900 { background-color: var(--felt-900) !important; }
+    .bg-slate-800 { background-color: var(--felt-800) !important; }
+    .bg-slate-700 { background-color: var(--felt-700) !important; }
+    .bg-slate-600 { background-color: var(--felt-600) !important; }
+    .hover\:bg-slate-600:hover, .hover\:bg-slate-500:hover { background-color: var(--felt-600) !important; }
+    .border-slate-600, .border-slate-700, .border-slate-800 { border-color: var(--line) !important; }
+    .text-slate-300, .text-slate-200 { color: var(--ivory) !important; }
+    .text-slate-400, .text-slate-500 { color: var(--ivory-dim) !important; }
+    .text-yellow-300, .text-yellow-400, .text-yellow-500 { color: var(--gold-400) !important; }
+    .bg-yellow-500, .hover\:bg-yellow-400:hover { background: linear-gradient(180deg, var(--gold-300), var(--gold-500)) !important; color:#1b1405 !important; }
+    .bg-violet-600, .bg-violet-700, .bg-indigo-700, .bg-blue-600 { background: linear-gradient(180deg, var(--felt-600), var(--felt-700)) !important; border:1px solid var(--gold-700) !important; color: var(--gold-300) !important; }
+    .hover\:bg-violet-500:hover, .hover\:bg-violet-600:hover, .hover\:bg-indigo-600:hover, .hover\:bg-blue-500:hover { filter: brightness(1.25); }
+    .text-violet-400, .text-emerald-400 { color: var(--gold-300) !important; }
+    .border-violet-600, .border-violet-700, .border-emerald-800, .border-emerald-600 { border-color: var(--gold-700) !important; }
+    .modal-backdrop { background: rgba(3,10,7,.82); backdrop-filter: blur(3px); }
+    .scrollable { scrollbar-color: var(--gold-700) var(--felt-900); }
+    ::-webkit-scrollbar-track { background: var(--felt-900) !important; }
+    ::-webkit-scrollbar-thumb { background: var(--gold-700) !important; }
+    input[type=number], input[type=text], input:not([type]) { color: var(--ivory); }
+    input:focus { outline:none; border-color: var(--gold-400) !important; box-shadow: 0 0 0 2px rgba(230,195,106,.25); }
+
+    /* ?? ??: ?? + ?? ??? ?? */
+    .panel { position:relative; background: linear-gradient(180deg, rgba(37,90,68,.6), rgba(21,56,42,.9));
+      border:1px solid var(--line); border-radius:1rem; box-shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04); }
+    .panel-gold { border-color: rgba(230,195,106,.5); box-shadow: 0 10px 30px rgba(0,0,0,.4), 0 0 0 1px rgba(230,195,106,.08), inset 0 1px 0 rgba(255,235,170,.12); }
+    .eyebrow { font-size:.7rem; letter-spacing:.28em; font-weight:700; color: var(--gold-500); text-transform:uppercase; }
+    .serif { font-family: var(--serif); }
+    .gold-text { background: linear-gradient(180deg, #fff3c8 0%, var(--gold-400) 55%, var(--gold-500) 100%); -webkit-background-clip:text; background-clip:text; color:transparent !important; }
+    .divider { height:1px; background: linear-gradient(90deg, transparent, var(--gold-500), transparent); opacity:.6; }
+
+    /* ?? */
+    .hero { position:relative; width:100%; overflow:hidden; text-align:center; padding:2.4rem 1rem 2rem;
+      background: linear-gradient(180deg, #050d0a 0%, #0b1c15 100%); border-bottom:1px solid var(--line); }
+    .hero::before { content:''; position:absolute; inset:0; pointer-events:none;
+      background:
+        radial-gradient(520px 260px at 50% 0%, rgba(230,195,106,.20), transparent 70%),
+        radial-gradient(420px 220px at 0% 100%, rgba(31,77,57,.9), transparent 70%),
+        radial-gradient(420px 220px at 100% 100%, rgba(31,77,57,.9), transparent 70%); }
+    .hero > * { position:relative; z-index:1; }
+    .hero-suits { display:flex; justify-content:center; gap:.9rem; font-size:1rem; letter-spacing:.2em; margin-bottom:.35rem; }
+    .hero-suits .r { color:#d9544a; } .hero-suits .b { color: var(--ivory); }
+    .hero-eyebrow { font-size:.72rem; letter-spacing:.42em; font-weight:700; color: var(--gold-500); }
+    .hero-title { margin:.5rem 0 .4rem; font-family: var(--serif); font-size:clamp(2.1rem,7vw,3.8rem); font-weight:900; line-height:1.12; letter-spacing:.01em;
+      background: linear-gradient(180deg, #fff6d6 0%, var(--gold-400) 50%, var(--gold-500) 100%); -webkit-background-clip:text; background-clip:text; color:transparent;
+      text-shadow:none; filter: drop-shadow(0 2px 10px rgba(230,195,106,.25)); }
+    .hero-title .vegas { font-style:italic; }
+    .hero-rule { display:flex; align-items:center; justify-content:center; gap:.8rem; max-width:420px; margin:.2rem auto .5rem; color:var(--gold-500); font-size:.8rem; }
+    .hero-rule::before, .hero-rule::after { content:''; flex:1; height:1px; background: linear-gradient(90deg, transparent, var(--gold-500)); }
+    .hero-rule::after { transform:scaleX(-1); }
+    .hero-sub { font-size:clamp(.78rem,2.2vw,.95rem); color: var(--ivory-dim); letter-spacing:.04em; }
+    .hero-sub b { margin:0 .6rem; font-weight:400; color: var(--gold-700); }
+    .hero-pill { display:inline-flex; align-items:center; gap:.55rem; margin-top:1rem; padding:.42rem 1.1rem; border-radius:9999px; font-size:.85rem; color: var(--ivory);
+      background: rgba(7,19,15,.7); border:1px solid rgba(230,195,106,.45); }
+    .hero-dot { width:.55rem; height:.55rem; border-radius:50%; background: var(--gold-400); box-shadow:0 0 8px var(--gold-400); }
+    .hero-chips { position:absolute; top:.8rem; right:1rem; display:flex; gap:.25rem; opacity:.9; }
+    .hero-chips i { width:1rem; height:1rem; border-radius:50%; border:2px dashed rgba(255,255,255,.55); display:block; box-shadow:0 1px 3px rgba(0,0,0,.5); }
+    .hero-compact { padding:.9rem 1rem .8rem; }
+    .hero-compact .hero-suits, .hero-compact .hero-rule { display:none; }
+    .hero-compact .hero-title { font-size:clamp(1.3rem,4.5vw,1.9rem); margin:.2rem 0 0; }
+    .hero-compact .hero-pill { margin-top:.5rem; padding:.22rem .8rem; font-size:.76rem; }
+
+    /* ???/???? ?? */
+    .digits { font-family: var(--serif); font-variant-numeric: tabular-nums; }
+    .glow-gold { text-shadow: 0 0 24px rgba(230,195,106,.35); }
+    .felt-table { background: radial-gradient(ellipse at 50% 40%, #1f6b4a 0%, #14533a 55%, #0e3d2b 100%);
+      border:5px solid #4a2f17; box-shadow: inset 0 0 40px rgba(0,0,0,.55), 0 0 0 2px var(--gold-700), 0 12px 30px rgba(0,0,0,.5); }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
+
+// ─── CONSTANTS ────────────────────────────────────────────────────────────────
+const CHIP_TYPES = [
+  { key:'black', label:'Black', value:100,  colorClass:'chip-black', hex:'#1E1E1E', textHex:'#ffffff' },
+  { key:'green', label:'Green', value:500,  colorClass:'chip-green', hex:'#10B981', textHex:'#ffffff' },
+  { key:'red',   label:'Red',   value:1000, colorClass:'chip-red',   hex:'#EF4444', textHex:'#ffffff' },
+  { key:'sky',   label:'Sky',   value:5000, colorClass:'chip-sky',   hex:'#0EA5E9', textHex:'#ffffff' },
+];
+const TOTAL_CHIPS = { black:100, green:50, red:50, sky:50 };
+const ALLOCATION = {
+  2: { black:15, green:7, red:5, sky:2 },
+  3: { black:15, green:7, red:5, sky:2 },
+  4: { black:15, green:7, red:5, sky:2 },
+  5: { black:15, green:7, red:5, sky:2 },
+  6: { black:10, green:6, red:6, sky:2 },
+  7: { black:10, green:4, red:7, sky:2 },
+  8: { black:10, green:4, red:2, sky:3 },
+};
+// 인원수별 블라인드 (3레벨 × 60분 = 3시간, 스택 20,000원 기준)
+// 인원이 많을수록 전체 칩이 많아 탈락에 시간이 걸리므로 후반 블라인드를 더 높게 설정
+const BLIND_LEVELS_BY_COUNT = {
+  2: [{ sb:200, bb:400 }, { sb:500, bb:1000 }, { sb:1000, bb:2000 }],
+  3: [{ sb:100, bb:200 }, { sb:300, bb:600  }, { sb:600,  bb:1200 }],
+  4: [{ sb:100, bb:200 }, { sb:300, bb:600  }, { sb:600,  bb:1200 }],
+  5: [{ sb:100, bb:200 }, { sb:300, bb:600  }, { sb:800,  bb:1600 }],
+  6: [{ sb:100, bb:200 }, { sb:400, bb:800  }, { sb:1000, bb:2000 }],
+  7: [{ sb:100, bb:200 }, { sb:500, bb:1000 }, { sb:1500, bb:3000 }],
+  8: [{ sb:100, bb:200 }, { sb:500, bb:1000 }, { sb:1500, bb:3000 }],
+};
+// cards: 예시 5장, use: 앞에서부터 족보를 이루는 카드 수
+const HAND_RANKINGS = [
+  { rank:1,  name:'로열 플러시',     en:'Royal Flush',     desc:'같은 무늬 A K Q J 10',       cards:['A♠','K♠','Q♠','J♠','10♠'], use:5 },
+  { rank:2,  name:'스트레이트 플러시', en:'Straight Flush',  desc:'같은 무늬 5장 연속',          cards:['9♥','8♥','7♥','6♥','5♥'],  use:5 },
+  { rank:3,  name:'포카드',          en:'Four of a Kind',  desc:'같은 숫자 4장',              cards:['K♠','K♥','K♦','K♣','A♠'],  use:4 },
+  { rank:4,  name:'풀하우스',        en:'Full House',      desc:'같은 숫자 3장 + 2장',         cards:['Q♠','Q♥','Q♦','J♣','J♠'],  use:5 },
+  { rank:5,  name:'플러시',          en:'Flush',           desc:'같은 무늬 5장 (순서 무관)',    cards:['A♣','J♣','8♣','6♣','2♣'],  use:5 },
+  { rank:6,  name:'스트레이트',      en:'Straight',        desc:'숫자 5장 연속 (무늬 무관)',    cards:['8♠','7♥','6♦','5♣','4♠'],  use:5 },
+  { rank:7,  name:'트리플',          en:'Three of a Kind', desc:'같은 숫자 3장',              cards:['7♠','7♥','7♦','K♣','2♠'],  use:3 },
+  { rank:8,  name:'투페어',          en:'Two Pair',        desc:'같은 숫자 2장 × 2쌍',         cards:['A♠','A♥','K♦','K♣','Q♠'],  use:4 },
+  { rank:9,  name:'원페어',          en:'One Pair',        desc:'같은 숫자 2장',              cards:['J♠','J♥','A♦','K♣','Q♠'],  use:2 },
+  { rank:10, name:'하이카드',        en:'High Card',       desc:'아무 조합 없음 — 가장 높은 카드', cards:['A♠','Q♥','9♦','7♣','2♠'],  use:1 },
+];
+
+// ─── WEB AUDIO ENGINE ─────────────────────────────────────────────────────────
+function useAudio() {
+  const ctxRef = useRef(null);
+  const getCtx = () => {
+    if (!ctxRef.current) ctxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    if (ctxRef.current.state === 'suspended') ctxRef.current.resume();
+    return ctxRef.current;
+  };
+  const beep = useCallback((freq=440, dur=0.2, type='sine', vol=0.4, delay=0) => {
+    try {
+      const ctx = getCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = type; osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+      gain.gain.setValueAtTime(vol, ctx.currentTime + delay);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + dur);
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + dur + 0.05);
+    } catch(e){}
+  }, []);
+  const playCountdown = useCallback(() => {
+    for(let i=0;i<5;i++) beep(880,0.15,'square',0.3,i*0.9);
+  },[beep]);
+  const playLevelUp = useCallback(() => {
+    [523,659,784,1046].forEach((f,i)=>beep(f,0.25,'sine',0.5,i*0.18));
+  },[beep]);
+  const playClick = useCallback(() => beep(600,0.06,'square',0.2),[beep]);
+  return { playCountdown, playLevelUp, playClick };
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+const fmt = (n) => n.toLocaleString('ko-KR') + '원';
+const chipValue = (counts) =>
+  (counts.black||0)*100 + (counts.green||0)*500 + (counts.red||0)*1000 + (counts.sky||0)*5000;
+
+// stacks: 지급된 스택 수 (기본 = 인원수, 리바이가 있으면 총 바이인 횟수)
+function calcBankAfterAlloc(playerCount, stacks = playerCount) {
+  const a = ALLOCATION[playerCount] || ALLOCATION[4];
+  return {
+    black: TOTAL_CHIPS.black - a.black * stacks,
+    green: TOTAL_CHIPS.green - a.green * stacks,
+    red:   TOTAL_CHIPS.red   - a.red   * stacks,
+    sky:   TOTAL_CHIPS.sky   - a.sky   * stacks,
+  };
+}
+
+// ─── CHIP COUNTER COMPONENT ───────────────────────────────────────────────────
+function ChipCounter({ counts, onChange }) {
+  return (
+    <div className="grid grid-cols-4 gap-1">
+      {CHIP_TYPES.map(ct => (
+        <div key={ct.key} className="flex flex-col items-center gap-1">
+          <span className={`badge ${ct.colorClass} text-xs`}>{ct.label}</span>
+          <div className="flex items-center gap-1">
+            <button tabIndex={-1} className="btn btn-sm bg-slate-700 text-white px-1"
+              onClick={()=>onChange(ct.key, Math.max(0,(counts[ct.key]||0)-1))}>−</button>
+            <input type="number" min="0"
+              className="w-10 text-center bg-slate-800 text-white rounded text-sm border border-slate-600 focus:border-violet-400 focus:outline-none"
+              value={counts[ct.key]||0}
+              onFocus={e=>e.target.select()}
+              onChange={e=>onChange(ct.key, Math.max(0,parseInt(e.target.value)||0))} />
+            <button tabIndex={-1} className="btn btn-sm bg-slate-700 text-white px-1"
+              onClick={()=>onChange(ct.key, (counts[ct.key]||0)+1)}>+</button>
+          </div>
+          <span className="text-xs text-slate-400">{fmt((counts[ct.key]||0)*ct.value)}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── HAND RANKINGS MODAL ─────────────────────────────────────────────────────
+function MiniCard({ label, used, small }) {
+  const suit = label.slice(-1);
+  const rank = label.slice(0, -1);
+  const red = suit === '♥' || suit === '♦';
+  return (
+    <div className={`flex flex-col items-center justify-center rounded-md bg-white font-black leading-none ${red?'text-red-500':'text-slate-900'} ${used?'ring-2 ring-yellow-400':''}`}
+      style={{ width: small?26:36, height: small?36:50, opacity: used ? 1 : 0.35 }}>
+      <span style={{fontSize: small?11:14}}>{rank}</span>
+      <span style={{fontSize: small?12:16}}>{suit}</span>
+    </div>
+  );
+}
+
+// ─── PREFLOP CHART (GTO 스타일 오픈 레인지, 100BB 6-max 근사) ─────────────────────
+const RANK_STR = 'AKQJT98765432';
+const PREMIUM_RANGE = 'TT+,AQs+,AKo';
+const PREFLOP_RANGES = {
+  UTG: { label:'UTG', desc:'가장 먼저 행동 · 가장 타이트',
+    range:'55+,A9s+,A2s-A5s,KTs+,QTs+,JTs,T9s,98s,AJo+,KQo' },
+  MP:  { label:'MP',  desc:'중간 포지션',
+    range:'44+,A8s+,A2s-A5s,K9s+,Q9s+,J9s+,T9s,98s,87s,76s,ATo+,KJo+' },
+  CO:  { label:'CO',  desc:'버튼 바로 앞',
+    range:'22+,A2s+,K7s+,Q9s+,J9s+,T8s+,97s+,87s,76s,65s,54s,ATo+,KTo+,QTo+,JTo' },
+  BTN: { label:'BTN', desc:'딜러 버튼 · 가장 넓게',
+    range:'22+,A2s+,K2s+,Q4s+,J7s+,T7s+,96s+,86s+,75s+,65s,54s,A4o+,K8o+,Q9o+,J9o+,T9o,98o' },
+  SB:  { label:'SB',  desc:'스몰블라인드 · 레이즈/림프',
+    range:'22+,A2s+,K4s+,Q7s+,J8s+,T8s+,97s+,87s,76s,65s,54s,A5o+,K9o+,QTo+,JTo' },
+  BB:  { label:'BB',  desc:'빅블라인드 · 미니레이즈 방어(콜/레이즈)',
+    range:'22+,A2s+,K2s+,Q2s+,J5s+,T6s+,96s+,85s+,74s+,64s+,53s+,A2o+,K7o+,Q9o+,J9o+,T9o,98o,87o' },
+};
+function expandRange(str) {
+  const set = new Set();
+  const idx = (c) => RANK_STR.indexOf(c);
+  const parse = (t) => {
+    const m = /^([AKQJT2-9])([AKQJT2-9])(s|o)?(\+)?$/.exec(t);
+    return m ? { a: idx(m[1]), b: idx(m[2]), kind: m[3] || '', plus: !!m[4] } : null;
+  };
+  const add = (a, b, kind) => {
+    if (a === b) set.add(a + ',' + b);
+    else if (kind === 's') set.add(a + ',' + b);   // 정사각형 윗쪽 = 수딧
+    else set.add(b + ',' + a);                     // 아랫쪽 = 오프수딧
+  };
+  str.split(',').forEach(tok => {
+    const t = tok.trim();
+    if (t.includes('-')) {
+      const [x, y] = t.split('-').map(parse);
+      const lo = Math.min(x.b, y.b), hi = Math.max(x.b, y.b);
+      for (let b = lo; b <= hi; b++) add(x.a, b, x.kind);
+      return;
+    }
+    const r = parse(t);
+    if (!r) return;
+    if (r.a === r.b) { // 페어
+      if (r.plus) for (let i = 0; i <= r.a; i++) add(i, i, '');
+      else add(r.a, r.a, '');
+    } else if (r.plus) {
+      for (let b = r.a + 1; b <= r.b; b++) add(r.a, b, r.kind);
+    } else add(r.a, r.b, r.kind);
+  });
+  return set;
+}
+const PREFLOP_SETS = Object.fromEntries(Object.entries(PREFLOP_RANGES).map(([k, v]) => [k, expandRange(v.range)]));
+const PREMIUM_SET = expandRange(PREMIUM_RANGE);
+
+function PreflopChartPanel() {
+  const [pos, setPos] = useState('BTN');
+  const set = PREFLOP_SETS[pos];
+  const cellLabel = (i, j) => i === j ? RANK_STR[i] + RANK_STR[j]
+    : i < j ? RANK_STR[i] + RANK_STR[j] + 's' : RANK_STR[j] + RANK_STR[i] + 'o';
+  let combos = 0;
+  set.forEach(k => { const [i, j] = k.split(',').map(Number); combos += i === j ? 6 : i < j ? 4 : 12; });
+  const pct = (combos / 1326 * 100).toFixed(0);
+  return (
+    <div className="panel p-3">
+      <div className="flex items-baseline justify-between mb-2">
+        <h3 className="eyebrow">Preflop Chart · GTO 스타터 핸드</h3>
+        <span className="text-[10px] text-slate-500">상위 {pct}% 핸드</span>
+      </div>
+      <div className="flex flex-wrap gap-1 mb-2">
+        {Object.keys(PREFLOP_RANGES).map(k=>(
+          <button key={k} onClick={()=>setPos(k)}
+            className={`btn btn-sm text-xs ${pos===k?'bg-yellow-500 text-black font-black':'bg-slate-700 text-white'}`}>
+            {PREFLOP_RANGES[k].label}
+          </button>
+        ))}
+      </div>
+      <div className="text-[11px] text-slate-400 mb-2">{PREFLOP_RANGES[pos].desc}</div>
+      <div className="grid gap-px" style={{gridTemplateColumns:'repeat(13, minmax(0, 1fr))'}}>
+        {RANK_STR.split('').map((_, i) => RANK_STR.split('').map((__, j) => {
+          const key = i + ',' + j;
+          const inR = set.has(key);
+          const prem = inR && PREMIUM_SET.has(key);
+          const style = prem ? { background:'#e6c36a', color:'#1b1405' }
+            : inR ? { background:'#2f8f63', color:'#fff' }
+            : { background:'rgba(255,255,255,.05)', color:'rgba(160,180,170,.55)' };
+          return (
+            <div key={key} className="flex items-center justify-center font-bold rounded-sm"
+              style={{ ...style, aspectRatio:'1 / 1', fontSize:9, letterSpacing:'-.03em', lineHeight:1 }}>
+              {cellLabel(i, j)}
+            </div>
+          );
+        }))}
+      </div>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[10px] text-slate-400">
+        <span className="flex items-center gap-1"><i style={{width:10,height:10,background:'#e6c36a',borderRadius:2,display:'inline-block'}} />프리미엄 (레이즈·3벳)</span>
+        <span className="flex items-center gap-1"><i style={{width:10,height:10,background:'#2f8f63',borderRadius:2,display:'inline-block'}} />오픈/참여</span>
+        <span className="flex items-center gap-1"><i style={{width:10,height:10,background:'rgba(255,255,255,.1)',borderRadius:2,display:'inline-block'}} />폴드</span>
+      </div>
+      <p className="text-[10px] text-slate-500 mt-1">윗쪽 = 수딧(s), 아랫쪽 = 오프수딧(o), 대각선 = 페어 · 100BB 기준 근사치(솔버 정확값 아님). 스택이 20BB 이하로 줄면 더 타이트하게.</p>
+    </div>
+  );
+}
+
+function PreflopChartModal({ onClose }) {
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="w-full max-w-lg scrollable" style={{maxHeight:'92vh'}} onClick={e=>e.stopPropagation()}>
+        <div className="panel panel-gold p-4 md:p-5">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="serif text-2xl font-black gold-text">♣ GTO 프리플랍 차트</h2>
+            <button onClick={onClose} className="text-slate-400 hover:text-white text-2xl leading-none">×</button>
+          </div>
+          <PreflopChartPanel />
+          <button onClick={onClose} className="btn btn-md bg-slate-700 text-white w-full mt-3">닫기</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 대시보드에 항상 펼쳐 두는 족보 패널
+function HandRankingsPanel() {
+  const tierColor = (rank) =>
+    rank <= 2 ? 'bg-yellow-500' : rank <= 4 ? 'bg-orange-500' : rank <= 7 ? 'bg-sky-500' : 'bg-slate-500';
+  return (
+    <div className="panel p-3">
+      <div className="flex items-baseline justify-between mb-2">
+        <h3 className="eyebrow">Hand Rankings · 패 순위</h3>
+        <span className="text-[10px] text-slate-500">위로 갈수록 강함</span>
+      </div>
+      <div className="space-y-1">
+        {HAND_RANKINGS.map(h=>(
+          <div key={h.rank} className="flex items-center gap-2 rounded-lg px-2 py-1 bg-slate-900 border border-slate-800">
+            <span className={`${tierColor(h.rank)} text-black font-black text-[11px] rounded-full w-5 h-5 flex items-center justify-center shrink-0`}>{h.rank}</span>
+            <div className="w-24 shrink-0">
+              <div className="text-xs font-bold text-white leading-tight">{h.name}</div>
+              <div className="text-[9px] text-slate-500 leading-tight">{h.en}</div>
+            </div>
+            <div className="flex gap-0.5 shrink-0">
+              {h.cards.map((c,i)=><MiniCard key={i} label={c} used={i < h.use} small />)}
+            </div>
+            <div className="text-[10px] text-slate-400 leading-tight flex-1 min-w-0">{h.desc}</div>
+          </div>
+        ))}
+      </div>
+      <p className="text-[10px] text-slate-500 mt-2 text-center">무늬끼리는 우열 없음 · 같으면 높은 숫자 → 키커 순</p>
+    </div>
+  );
+}
+
+function HandRankingsModal({ onClose }) {
+  const tierColor = (rank) =>
+    rank <= 2 ? 'bg-yellow-500' : rank <= 4 ? 'bg-orange-500' : rank <= 7 ? 'bg-sky-500' : 'bg-slate-500';
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="panel panel-gold p-4 md:p-6 w-full max-w-lg scrollable"
+        onClick={e=>e.stopPropagation()}>
+        <div className="flex justify-between items-center mb-1">
+          <h2 className="serif text-2xl font-black gold-text">♠ 포커 패 순위표</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-white text-2xl leading-none">×</button>
+        </div>
+        <p className="text-slate-400 text-xs mb-3">위로 갈수록 강한 패 · 노란 테두리 카드가 족보를 만드는 카드</p>
+        <div className="space-y-2">
+          {HAND_RANKINGS.map(h=>(
+            <div key={h.rank} className="bg-slate-900 rounded-xl p-3 border border-slate-700">
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`${tierColor(h.rank)} text-black font-black text-sm rounded-full w-6 h-6 flex items-center justify-center shrink-0`}>{h.rank}</span>
+                <span className="font-bold text-white">{h.name}</span>
+                <span className="text-slate-500 text-xs">{h.en}</span>
+                <div className="ml-auto w-16 bg-slate-700 rounded-full h-1.5 shrink-0">
+                  <div className={`${tierColor(h.rank)} h-1.5 rounded-full`} style={{width:`${(11-h.rank)*10}%`}} />
+                </div>
+              </div>
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex gap-1">
+                  {h.cards.map((c,i)=><MiniCard key={i} label={c} used={i < h.use} />)}
+                </div>
+                <div className="text-slate-300 text-xs flex-1 min-w-[120px]">{h.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="text-slate-500 text-xs mt-3 text-center">
+          무늬끼리는 우열 없음 · 같은 족보면 높은 숫자 → 키커(남은 카드) 순으로 승부
+        </p>
+        <button onClick={onClose} className="btn btn-md bg-slate-700 text-white w-full mt-3">닫기</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── SETTLEMENT MODAL ─────────────────────────────────────────────────────────
+function SettlementModal({ players, onClose }) {
+  const [chipCounts, setChipCounts] = useState(() =>
+    Object.fromEntries(players.map(p=>[p.id,{black:0,green:0,red:0,sky:0}]))
+  );
+  const [directMode, setDirectMode] = useState(() =>
+    Object.fromEntries(players.map(p=>[p.id, false]))
+  );
+  const [directValues, setDirectValues] = useState(() =>
+    Object.fromEntries(players.map(p=>[p.id, '']))
+  );
+  const [settled, setSettled] = useState(false);
+  const modalRef = useRef(null);
+  const captureRef = useRef(null);
+  const [capMsg, setCapMsg] = useState('');
+
+  // 정산 결과 카드만 이미지로 캡처 → 공유(모바일) 또는 클립보드 복사 + PNG 저장
+  const captureResult = async () => {
+    if (!captureRef.current || typeof html2canvas === 'undefined') { setCapMsg('이미지 캡처 라이브러리를 불러오지 못했습니다'); return; }
+    setCapMsg('캡처 중...');
+    try {
+      const canvas = await html2canvas(captureRef.current, {
+        scale: 2, backgroundColor: null, useCORS: true,
+        // html2canvas는 background-clip:text 미지원 → 금색 단색으로 대체
+        onclone: (doc) => doc.querySelectorAll('.gold-text').forEach(el => {
+          el.style.setProperty('background', 'none', 'important');
+          el.style.setProperty('color', '#f3dc9b', 'important');
+        }),
+      });
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+      const file = new File([blob], `채스베이거스_정산_${new Date().toLocaleDateString('sv-SE')}.png`, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files:[file] })) {
+        try { await navigator.share({ files:[file], title:'채스베이거스 정산' }); setCapMsg('공유 완료'); return; } catch (e) { if (e && e.name === 'AbortError') { setCapMsg(''); return; } }
+      }
+      let copied = false;
+      try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); copied = true; } catch (e) {}
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = file.name; a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+      setCapMsg(copied ? '이미지를 복사하고 저장했습니다' : '이미지를 저장했습니다');
+    } catch (e) { setCapMsg('캡처에 실패했습니다'); }
+  };
+
+  // 열릴 때 첫 입력란에 포커스 → Tab으로 입력란만 순서대로 이동
+  useEffect(() => {
+    modalRef.current?.querySelector('input[type=number]')?.focus();
+  }, []);
+
+  const playerData = players.map(p => {
+    const isDirect = directMode[p.id];
+    const finalChipValue = isDirect ? (parseInt(directValues[p.id])||0) : chipValue(chipCounts[p.id]);
+    const totalBuyIn = p.buyIns * 20000;
+    return { ...p, finalChipValue, totalBuyIn, net: finalChipValue - totalBuyIn };
+  });
+  const totalChipValue = playerData.reduce((s,p)=>s+p.finalChipValue,0);
+  const totalBuyIn = playerData.reduce((s,p)=>s+p.totalBuyIn,0);
+  const discrepancy = totalChipValue - totalBuyIn;
+  // 첫 번째 플레이어가 은행: 게임 중 모든 바이인(리바이 포함)을 받고, 종료 후 최종 칩 금액을 송금
+  const bank = playerData[0];
+  const ranking = [...playerData]
+    .sort((a,b)=>b.finalChipValue-a.finalChipValue)
+    .map((p,_,arr)=>({ ...p, place: arr.filter(q=>q.finalChipValue>p.finalChipValue).length+1 }));
+  const bankReceived = playerData.slice(1).reduce((s,p)=>s+p.totalBuyIn,0);
+  const payouts = playerData.slice(1).filter(p=>p.finalChipValue>0);
+  const bankPaidOut = payouts.reduce((s,p)=>s+p.finalChipValue,0);
+  const transfers = settled
+    ? payouts.map(p=>({ from:bank.name, to:p.name, amount:p.finalChipValue }))
+    : [];
+
+  const updateChip = (playerId, chipKey, val) =>
+    setChipCounts(prev=>({...prev,[playerId]:{...prev[playerId],[chipKey]:val}}));
+
+  return (
+    <div className="modal-backdrop">
+      <div ref={modalRef} className="panel panel-gold p-4 md:p-6 w-full max-w-3xl scrollable"
+        style={{maxHeight:'92vh'}}>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="serif text-2xl font-black gold-text">♛ 게임 종료 / 최종 정산</h2>
+          <button tabIndex={-1} onClick={onClose} className="text-slate-400 hover:text-white text-2xl">×</button>
+        </div>
+
+        {/* Chip Counts per player */}
+        <div className="space-y-4 mb-4">
+          {playerData.map(p=>(
+            <div key={p.id} className="bg-slate-900 rounded-xl p-3 border border-slate-700">
+              <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                <span className="font-bold text-white text-base">{p.name}</span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-slate-400 text-sm">바이인: <span className="text-yellow-400 font-bold">{fmt(p.totalBuyIn)}</span></span>
+                  <button tabIndex={-1}
+                    className={`btn btn-sm ${directMode[p.id]?'bg-violet-600':'bg-slate-700'} text-white text-xs`}
+                    onClick={()=>setDirectMode(prev=>({...prev,[p.id]:!prev[p.id]}))}>
+                    {directMode[p.id]?'칩 카운트':'직접 입력'}
+                  </button>
+                </div>
+              </div>
+              {directMode[p.id] ? (
+                <div className="flex items-center gap-2">
+                  <label className="text-slate-400 text-sm">최종 금액</label>
+                  <input type="number"
+                    className="flex-1 bg-slate-800 text-white rounded p-2 border border-slate-600 focus:border-violet-400 focus:outline-none"
+                    placeholder="0"
+                    value={directValues[p.id]}
+                    onFocus={e=>e.target.select()}
+                    onChange={e=>setDirectValues(prev=>({...prev,[p.id]:e.target.value}))} />
+                  <span className="text-slate-400 text-sm">원</span>
+                </div>
+              ) : (
+                <ChipCounter counts={chipCounts[p.id]} onChange={(k,v)=>updateChip(p.id,k,v)} />
+              )}
+              <div className="flex justify-between mt-2 flex-wrap gap-1">
+                <span className="text-slate-400 text-xs">최종 칩값: <span className="text-emerald-400 font-bold">{fmt(p.finalChipValue)}</span></span>
+                <span className={`text-xs font-bold ${p.net>0?'text-emerald-400':p.net<0?'text-red-400':'text-slate-400'}`}>
+                  {p.net>0?'▲ +':'▼ '}{fmt(Math.abs(p.net))} {p.net>0?'이익':p.net<0?'손실':'±0'}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Discrepancy Warning */}
+        {Math.abs(discrepancy)>0 && (
+          <div className={`rounded-xl p-3 mb-4 text-center font-bold text-white ${Math.abs(discrepancy)>100?'flash-warn':'bg-yellow-700'}`}>
+            ⚠️ 불일치 감지: {discrepancy>0?'+':''}{fmt(discrepancy)} (칩 분실/오계산 확인 필요)
+          </div>
+        )}
+        {Math.abs(discrepancy)===0 && totalChipValue>0 && (
+          <div className="bg-emerald-900 border border-emerald-600 rounded-xl p-3 mb-4 text-center text-emerald-400 font-bold">
+            칩 합계 일치! 총 {fmt(totalBuyIn)}
+          </div>
+        )}
+
+        {!settled ? (
+          <button onClick={()=>setSettled(true)}
+            className="btn btn-lg bg-violet-600 hover:bg-violet-500 text-white w-full text-base font-bold">
+            정산 계산하기
+          </button>
+        ) : (
+          <div>
+          <div ref={captureRef} className="bg-slate-900 rounded-xl p-4 border border-violet-700">
+            <div className="eyebrow text-center" style={{letterSpacing:'.3em'}}>CHAE'S VEGAS · FINAL RESULTS</div>
+            <h3 className="serif text-lg font-black gold-text mt-1 text-center">♛ 오늘의 게임 결과</h3>
+            <div className="flex items-center justify-center gap-2 mt-1 mb-3">
+              <span style={{height:1,width:36,background:'linear-gradient(90deg,transparent,rgba(230,195,106,.7))'}} />
+              <span className="text-[11px] tracking-[.2em]" style={{color:'rgba(243,220,155,.9)'}}>
+                {(()=>{const d=new Date();return `${d.getFullYear()}. ${String(d.getMonth()+1).padStart(2,'0')}. ${String(d.getDate()).padStart(2,'0')} (${'일월화수목금토'[d.getDay()]})`;})()}
+              </span>
+              <span style={{height:1,width:36,background:'linear-gradient(270deg,transparent,rgba(230,195,106,.7))'}} />
+            </div>
+            {/* Player ranking */}
+            <div className="mb-3 space-y-1">
+              {ranking.map(p=>(
+                <div key={p.id} className="flex items-center gap-2 rounded-lg px-3 py-1.5"
+                  style={p.place===1
+                    ? {background:'rgba(230,195,106,.14)',border:'1px solid rgba(230,195,106,.55)'}
+                    : {background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.06)'}}>
+                  <span className="digits font-black text-base w-7 text-center" style={{color:p.place===1?'#f3dc9b':'#9fb5a8'}}>
+                    {p.place===1?'♛':p.place}
+                  </span>
+                  <span className={`font-bold text-sm flex-1 truncate ${p.place===1?'text-yellow-300':'text-white'}`}>{p.name}</span>
+                  <span className="text-xs text-slate-300">{fmt(p.finalChipValue)}</span>
+                  <span className={`text-xs font-bold w-24 text-right ${p.net>0?'text-emerald-400':p.net<0?'text-red-400':'text-slate-400'}`}>
+                    {p.net>0?'+':p.net<0?'-':'±'}{fmt(Math.abs(p.net))}
+                  </span>
+                </div>
+              ))}
+            </div>
+            {/* Per-player buy-in summary */}
+            <div className="mb-3 overflow-x-auto">
+              <table className="w-full text-xs text-center">
+                <thead>
+                  <tr className="text-slate-400 border-b border-slate-700">
+                    <th className="py-1 text-left">플레이어</th>
+                    <th className="py-1">바이인</th>
+                    <th className="py-1">최종 칩</th>
+                    <th className="py-1">손익</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {playerData.map(p=>(
+                    <tr key={p.id} className="border-b border-slate-800">
+                      <td className="py-1 text-left text-white font-bold">{p.name}</td>
+                      <td className="py-1 text-yellow-400">{fmt(p.totalBuyIn)} ({p.buyIns}회)</td>
+                      <td className="py-1 text-slate-200">{fmt(p.finalChipValue)}</td>
+                      <td className={`py-1 font-bold ${p.net>0?'text-emerald-400':p.net<0?'text-red-400':'text-slate-400'}`}>
+                        {p.net>0?'+':p.net<0?'-':''}{fmt(Math.abs(p.net))}
+                      </td>
+                    </tr>
+                  ))}
+                  <tr className="text-slate-300 font-bold">
+                    <td className="py-1 text-left">합계</td>
+                    <td className="py-1 text-yellow-400">{fmt(totalBuyIn)}</td>
+                    <td className="py-1">{fmt(totalChipValue)}</td>
+                    <td className="py-1">{discrepancy===0?'±0원':`${discrepancy>0?'+':'-'}${fmt(Math.abs(discrepancy))}`}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div className="mb-3 bg-slate-800 rounded-lg p-3 text-xs text-slate-300 space-y-1">
+              <div className="flex justify-between">
+                <span>{bank.name}이(가) 게임 중 받은 바이인 (본인 제외)</span>
+                <span className="text-yellow-400 font-bold">{fmt(bankReceived)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>{bank.name}이(가) 지급할 금액 합계</span>
+                <span className="text-yellow-400 font-bold">{fmt(bankPaidOut)}</span>
+              </div>
+            </div>
+            <div className="eyebrow text-center mb-2" style={{letterSpacing:'.25em'}}>PAYOUT · {bank.name}에게서 받을 금액</div>
+            {transfers.length===0 ? (
+              <p className="text-center text-slate-400">송금할 플레이어가 없습니다.</p>
+            ) : (
+              <div className="space-y-2">
+                {transfers.map((t,i)=>(
+                  <div key={i} className="flex items-center justify-between bg-slate-800 rounded-lg p-3">
+                    <span className="text-red-400 font-bold">{t.from}</span>
+                    <span className="text-slate-400 mx-2">→</span>
+                    <span className="text-emerald-400 font-bold">{t.to}</span>
+                    <span className="text-yellow-400 font-bold ml-auto">{fmt(t.amount)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+            <button onClick={captureResult} className="btn btn-sm bg-slate-700 text-white mt-3 w-full text-xs">
+              📸 정산 결과 이미지로 저장
+            </button>
+            {capMsg && <div className="text-center text-xs text-slate-400 mt-1">{capMsg}</div>}
+          </div>
+        )}
+
+        <button onClick={onClose} className="btn btn-md bg-slate-700 text-white w-full mt-3">닫기</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── HERO HEADER ──────────────────────────────────────────────────────────────
+function HeroHeader({ status, compact }) {
+  return (
+    <header className={`hero${compact?' hero-compact':''}`}>
+      <div className="hero-chips" aria-hidden="true">
+        <i style={{background:'#1E1E1E'}} /><i style={{background:'#10B981'}} /><i style={{background:'#EF4444'}} /><i style={{background:'#0EA5E9'}} />
+      </div>
+      <div className="hero-suits" aria-hidden="true">
+        <span className="b">♠</span><span className="r">♥</span><span className="b">♣</span><span className="r">♦</span>
+      </div>
+      <div className="hero-eyebrow">FAMILY HOLD'EM NIGHT</div>
+      <h1 className="hero-title">채스<span className="vegas">베이거스</span></h1>
+      <div className="hero-rule"><span>♦</span></div>
+      <div className="hero-sub">
+        THE CHAE FAMILY CARD ROOM<b>·</b>Buy-in ₩20,000<b>·</b>3 Levels × 60 min
+      </div>
+      <div className="hero-pill">
+        <span className="hero-dot" />
+        <span>{status}</span>
+      </div>
+    </header>
+  );
+}
+
+// ─── PLAYER SETUP SCREEN ──────────────────────────────────────────────────────
+function PlayerSetupScreen({ onStart }) {
+  const [count, setCount] = useState(4);
+  const [names, setNames] = useState(['채한빈','채은빈','채충완','김현호','김해솔','김의진','김금란','김국란'].slice(0,4));
+  const alloc = ALLOCATION[count];
+  const bank = calcBankAfterAlloc(count);
+  const stackVal = chipValue(alloc);
+  const updateCount = (n) => {
+    setCount(n);
+    setNames(prev=>{
+      const defaults=['채한빈','채은빈','채충완','김현호','김해솔','김의진','김금란','김국란'];
+      if(n>prev.length) return [...prev,...defaults.slice(prev.length,n)];
+      return prev.slice(0,n);
+    });
+  };
+  return (
+    <div className="min-h-screen flex flex-col items-center">
+      <HeroHeader status={`${count}명 · 스택 ${fmt(stackVal)} · 약 3시간`} />
+      <div className="panel panel-gold w-full max-w-lg p-6 m-4">
+        <div className="eyebrow mb-1">Table Setup</div>
+        <h2 className="serif text-2xl font-black gold-text mb-1">플레이어 설정</h2>
+        <div className="divider mb-4" />
+        {/* Player Count */}
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <span className="text-slate-300 text-sm font-medium">인원 수:</span>
+          {[2,3,4,5,6,7,8].map(n=>(
+            <button key={n} onClick={()=>updateCount(n)}
+              className={`btn btn-sm ${count===n?'bg-yellow-500 text-black font-black':'bg-slate-700 text-white'}`}>
+              {n}명
+            </button>
+          ))}
+        </div>
+        {/* Player Names — 테이블 배치 (대시보드 테이블 뷰와 동일한 좌석 순서) */}
+        <div className="text-xs text-slate-400 mb-1 text-center">좌석 순서대로 이름을 입력하세요 (1번 = 딜러 시작 · 은행)</div>
+        <div className="relative w-full mx-auto mb-4" style={{aspectRatio:'4 / 3', maxWidth:480}}>
+          <div className="absolute rounded-[50%] felt-table" style={{inset:'14% 12%'}} />
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="eyebrow" style={{color:'rgba(243,220,155,.8)'}}>{count} Seats</div>
+          </div>
+          {names.map((name,i)=>{
+            const ang = Math.PI/2 + (i*2*Math.PI)/count;
+            const pos = { left:`${50+40*Math.cos(ang)}%`, top:`${50+38*Math.sin(ang)}%` };
+            return (
+              <div key={i} className="absolute -translate-x-1/2 -translate-y-1/2" style={pos}>
+                <div className="text-center" style={{width:84}}>
+                  <div className="text-[10px] font-bold" style={{color:'rgba(243,220,155,.9)'}}>{i+1}{i===0?' · BTN':''}</div>
+                  <input className="w-full bg-slate-900 text-white rounded-lg px-1 py-1 border border-slate-600 text-xs text-center"
+                    value={name} onChange={e=>{const n=[...names];n[i]=e.target.value;setNames(n);}}
+                    placeholder={`플레이어 ${i+1}`} maxLength={10} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {/* Chip Allocation Display */}
+        <div className="bg-slate-900 rounded-xl p-4 mb-4 border border-slate-700">
+          <div className="text-sm font-bold text-slate-300 mb-2">
+            1인당 지급 칩 (스택: {fmt(stackVal)})
+          </div>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {CHIP_TYPES.map(ct=>(
+              <div key={ct.key} className="flex items-center gap-1">
+                <span className={`badge ${ct.colorClass} text-xs`}>{alloc[ct.key]}개</span>
+                <span className="text-slate-400 text-xs">× {fmt(ct.value)}</span>
+              </div>
+            ))}
+          </div>
+          <div className="text-xs font-bold text-slate-400 mb-1">블라인드 (레벨당 60분)</div>
+          <div className="flex flex-wrap gap-x-3 gap-y-1 mb-3 text-xs text-yellow-300">
+            {BLIND_LEVELS_BY_COUNT[count].map((l,i)=>(
+              <span key={i}>Lv.{i+1} {l.sb.toLocaleString()}/{l.bb.toLocaleString()}</span>
+            ))}
+          </div>
+          <div className="text-xs font-bold text-slate-400 mb-1">은행 잔여 재고</div>
+          <div className="flex flex-wrap gap-2">
+            {CHIP_TYPES.map(ct=>(
+              <div key={ct.key} className="flex items-center gap-1">
+                <span className={`badge ${ct.colorClass} text-xs`}>{bank[ct.key]}개</span>
+                <span className="text-slate-500 text-xs">{ct.label}</span>
+              </div>
+            ))}
+          </div>
+          <div className="text-xs text-slate-500 mt-1">은행 총 가치: {fmt(chipValue(bank))}</div>
+        </div>
+        <button onClick={()=>onStart(names.filter(n=>n.trim()),count)}
+          className="btn btn-lg bg-yellow-500 hover:bg-yellow-400 text-black font-black w-full text-lg tracking-widest">
+          ♠ 게임 시작
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── AUTO SAVE ───────────────────────────────────────────────────────────────
+const SAVE_KEY = 'chasvegas-save-v1';
+function loadSave() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SAVE_KEY));
+    return s && s.gameStarted && Array.isArray(s.players) && s.players.length ? s : null;
+  } catch (e) { return null; }
+}
+
+// ─── MAIN APP ────────────────────────────────────────────────────────────────
+function App() {
+  const [saved] = useState(loadSave); // 새로고침 시 복구할 저장본
+  const [gameStarted, setGameStarted] = useState(!!saved);
+  const [players, setPlayers] = useState(saved ? saved.players : []);
+  const [playerCount, setPlayerCount] = useState(saved ? saved.playerCount : 4);
+  const blindLevels = BLIND_LEVELS_BY_COUNT[playerCount] || BLIND_LEVELS_BY_COUNT[4];
+  const [dealerIdx, setDealerIdx] = useState(saved ? saved.dealerIdx : 0);
+  const [handNo, setHandNo] = useState(saved ? saved.handNo : 1);
+  const [levelIdx, setLevelIdx] = useState(saved ? saved.levelIdx : 0);
+  const levelDuration = 60;
+  const [timeLeft, setTimeLeft] = useState(saved ? saved.timeLeft : 60 * 60);
+  const [running, setRunning] = useState(false);
+  const [modal, setModal] = useState(null); // 'hand'|'gto'|'settle'
+  const audio = useAudio();
+  const countdownFiredRef = useRef(false);
+  const timerRef = useRef(null);
+
+  const activePlayers = players.filter(p=>!p.eliminated);
+
+  // Timer engine
+  useEffect(() => {
+    if (running) {
+      timerRef.current = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(timerRef.current);
+            setRunning(false);
+            audio.playLevelUp();
+            countdownFiredRef.current = false;
+            // Auto advance level
+            setLevelIdx(li => Math.min(li+1, blindLevels.length-1));
+            setTimeLeft(levelDuration * 60);
+            return levelDuration * 60;
+          }
+          if (prev <= 5 && !countdownFiredRef.current) {
+            countdownFiredRef.current = true;
+            audio.playCountdown();
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timerRef.current);
+  }, [running, levelDuration]);
+
+  // 상태가 바뀔 때마다 자동 저장 (타이머는 복구 시 일시정지 상태로 시작)
+  useEffect(() => {
+    try {
+      if (gameStarted) {
+        localStorage.setItem(SAVE_KEY, JSON.stringify({
+          gameStarted, players, playerCount, dealerIdx, handNo, levelIdx, timeLeft,
+        }));
+      } else {
+        localStorage.removeItem(SAVE_KEY);
+      }
+    } catch (e) {}
+  }, [gameStarted, players, playerCount, dealerIdx, handNo, levelIdx, timeLeft]);
+
+  const handleHome = () => {
+    if (!window.confirm('처음 화면으로 돌아가면 진행 중인 게임이 삭제됩니다. 계속할까요?')) return;
+    audio.playClick();
+    setGameStarted(false);
+    setRunning(false);
+  };
+
+  const handleStart = (names, count) => {
+    setPlayerCount(count);
+    setPlayers(names.map((name,i)=>({
+      id: i, name, buyIns:1, eliminated:false, isNew:false
+    })));
+    setDealerIdx(0);
+    setHandNo(1);
+    setLevelIdx(0);
+    setTimeLeft(levelDuration * 60);
+    setRunning(false);
+    setGameStarted(true);
+  };
+
+  const handleNextHand = () => {
+    audio.playClick();
+    const active = activePlayers;
+    if (active.length < 2) return;
+    const currentDealerInActive = active.findIndex(p=>p.id===players[dealerIdx]?.id);
+    const nextDealerInActive = (currentDealerInActive + 1) % active.length;
+    const nextDealerPlayerId = active[nextDealerInActive].id;
+    setDealerIdx(players.findIndex(p=>p.id===nextDealerPlayerId));
+    setHandNo(n=>n+1);
+  };
+
+  const togglePause = () => {
+    audio.playClick();
+    setRunning(r=>!r);
+    countdownFiredRef.current = false;
+  };
+  const handleReset = () => {
+    audio.playClick();
+    setRunning(false);
+    setTimeLeft(levelDuration * 60);
+    countdownFiredRef.current = false;
+  };
+  const handleNextLevel = () => {
+    audio.playClick();
+    if (levelIdx < blindLevels.length - 1) {
+      setLevelIdx(i=>i+1);
+      setTimeLeft(levelDuration * 60);
+      setRunning(false);
+      countdownFiredRef.current = false;
+    }
+  };
+  const handlePrevLevel = () => {
+    audio.playClick();
+    if (levelIdx > 0) {
+      setLevelIdx(i=>i-1);
+      setTimeLeft(levelDuration * 60);
+      setRunning(false);
+      countdownFiredRef.current = false;
+    }
+  };
+  const handleRebuy = (id) => {
+    audio.playClick();
+    // 탈락한 플레이어가 리바이하면 바로 복귀
+    setPlayers(prev=>prev.map(p=>p.id===id?{...p,buyIns:p.buyIns+1,eliminated:false}:p));
+  };
+  const handleEliminate = (id) => {
+    audio.playClick();
+    const target = players.find(p=>p.id===id);
+    // 딜러가 탈락하면 시계 방향 다음 생존자에게 버튼을 넘김
+    if (target && !target.eliminated && players[dealerIdx]?.id === id) {
+      for (let k=1; k<players.length; k++) {
+        const ni = (dealerIdx + k) % players.length;
+        if (!players[ni].eliminated && players[ni].id !== id) { setDealerIdx(ni); break; }
+      }
+    }
+    setPlayers(prev=>prev.map(p=>p.id===id ? {...p, eliminated:!p.eliminated} : p));
+  };
+
+  const level = blindLevels[levelIdx];
+  const mins = Math.floor(timeLeft/60);
+  const secs = timeLeft%60;
+  const totalSecs = levelDuration * 60;
+  const pct = (timeLeft / totalSecs) * 100;
+  const isUrgent = timeLeft <= 30;
+  const alloc = ALLOCATION[playerCount] || ALLOCATION[4];
+
+  // Dealer / SB / BB positions among active players
+  const dealerActiveIdx = activePlayers.findIndex(p=>p.id===players[dealerIdx]?.id);
+  const sbIdx = (dealerActiveIdx + 1) % activePlayers.length;
+  const bbIdx = (dealerActiveIdx + 2) % activePlayers.length;
+
+  if (!gameStarted) return <PlayerSetupScreen onStart={handleStart} />;
+
+  // ── 파생 값 ────────────────────────────────────────────────────────────────
+  const roleOf = (p) => {
+    const ai = activePlayers.findIndex(ap=>ap.id===p.id);
+    if (p.eliminated || ai === -1) return { dealer:false, sb:false, bb:false };
+    const hu = activePlayers.length <= 2;
+    return {
+      dealer: ai === dealerActiveIdx,
+      sb: hu ? ai === dealerActiveIdx : ai === sbIdx,
+      bb: hu ? ai !== dealerActiveIdx : ai === bbIdx,
+    };
+  };
+  const totalBuyIns = players.reduce((s,p)=>s+p.buyIns,0);
+  const bankNow = calcBankAfterAlloc(playerCount, totalBuyIns);
+  const canRebuy = CHIP_TYPES.every(ct=>bankNow[ct.key] >= alloc[ct.key]);
+  const rebuyCapacity = Math.min(...CHIP_TYPES.map(ct=>Math.floor(bankNow[ct.key]/alloc[ct.key])));
+  const totalPot = totalBuyIns * 20000;
+  const avgStack = activePlayers.length ? Math.round(totalPot/activePlayers.length) : 0;
+  const avgBB = level.bb ? Math.round(avgStack/level.bb) : 0;
+  const remainSecs = timeLeft + (blindLevels.length-1-levelIdx)*levelDuration*60;
+  const remainTotalMin = Math.ceil(remainSecs/60);
+  const remainText = remainTotalMin >= 60
+    ? `${Math.floor(remainTotalMin/60)}시간 ${remainTotalMin%60}분`
+    : `${remainTotalMin}분`;
+  const nextLevel = blindLevels[levelIdx+1];
+  const timerColor = isUrgent?'text-red-400':timeLeft<=60?'text-orange-400':'gold-text';
+
+  return (
+    <div className="min-h-screen text-white flex flex-col" style={{userSelect:'none'}}>
+      <HeroHeader compact
+        status={`핸드 #${handNo} · 생존 ${activePlayers.length}/${players.length}명 · ${new Date().toLocaleDateString('sv-SE')}`} />
+      <div className="flex-1 w-full max-w-5xl mx-auto p-3 grid gap-3 md:grid-cols-2 content-start">
+
+        {/* ── LEFT: 시간 · 블라인드 · 현황 ─────────────────────────────────── */}
+        <div className="space-y-3">
+
+          {/* 블라인드 + 타이머 */}
+          <div className="panel panel-gold p-5 text-center">
+            <div className="eyebrow">Level {levelIdx+1} / {blindLevels.length}</div>
+            <div className="text-[10px] tracking-[.25em] text-slate-500 mt-1">SMALL BLIND · BIG BLIND</div>
+            <div className="digits glow-gold text-5xl md:text-6xl font-black text-yellow-300 mb-3">
+              {level.sb.toLocaleString()} <span className="text-slate-600">/</span> {level.bb.toLocaleString()}
+            </div>
+            <div className="divider mb-3" />
+            <div className={isUrgent?'pulse':''}>
+              <div className={`digits text-6xl md:text-7xl font-black ${timerColor}`}>
+                {String(mins).padStart(2,'0')}:{String(secs).padStart(2,'0')}
+              </div>
+              <div className="w-full rounded-full h-1.5 mt-3" style={{background:'rgba(230,195,106,.15)'}}>
+                <div className="h-1.5 rounded-full transition-all"
+                  style={{width:`${pct}%`, background: isUrgent?'#ef4444':timeLeft<=60?'#fb923c':'linear-gradient(90deg,#c9a24a,#f3dc9b)'}} />
+              </div>
+            </div>
+            <div className="flex justify-between text-xs text-slate-400 mt-2">
+              <span>{nextLevel ? `다음 레벨 ${nextLevel.sb.toLocaleString()}/${nextLevel.bb.toLocaleString()}` : '마지막 레벨'}</span>
+              <span>게임 종료까지 약 {remainText}</span>
+            </div>
+            <div className="flex items-center gap-2 mt-3 flex-wrap justify-center">
+              <button onClick={handlePrevLevel} className="btn btn-sm bg-slate-700 text-white" disabled={levelIdx===0}>‹ 이전</button>
+              <button onClick={handleReset} className="btn btn-sm bg-slate-700 text-white">↺ 리셋</button>
+              <button onClick={togglePause}
+                className={`btn btn-md ${running?'bg-orange-500 hover:bg-orange-400 text-white':'bg-yellow-500 hover:bg-yellow-400 text-black'} font-black px-7 tracking-wider`}>
+                {running ? '❚❚ 일시정지' : '▶ 시작'}
+              </button>
+              <button onClick={handleNextLevel} className="btn btn-sm bg-slate-700 text-white" disabled={levelIdx===blindLevels.length-1}>다음 ›</button>
+            </div>
+          </div>
+
+          {/* 레벨 로드맵 */}
+          <div className="grid gap-2" style={{gridTemplateColumns:`repeat(${blindLevels.length}, minmax(0, 1fr))`}}>
+            {blindLevels.map((l,i)=>(
+              <div key={i} className={`rounded-xl p-2 text-center border ${
+                i===levelIdx ? 'border-yellow-500 text-yellow-300'
+                : i<levelIdx ? 'bg-slate-900 border-slate-800 text-slate-600'
+                : 'bg-slate-800 border-slate-700 text-slate-300'}`}
+                style={i===levelIdx?{background:'rgba(230,195,106,.12)',boxShadow:'0 0 0 1px rgba(230,195,106,.35)'}:undefined}>
+                <div className="text-xs font-bold">Lv.{i+1}{i<levelIdx?' ✓':''}</div>
+                <div className="text-sm font-black tabular-nums">{l.sb.toLocaleString()}/{l.bb.toLocaleString()}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* 현황 요약 */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="panel p-2.5 text-center">
+              <div className="eyebrow" style={{fontSize:'.6rem'}}>Alive</div>
+              <div className="digits text-2xl font-black text-white">{activePlayers.length}<span className="text-slate-500 text-sm">/{players.length}</span></div>
+            </div>
+            <div className="panel p-2.5 text-center">
+              <div className="eyebrow" style={{fontSize:'.6rem'}}>Pot</div>
+              <div className="digits text-lg font-black text-yellow-400">{fmt(totalPot)}</div>
+            </div>
+            <div className="panel p-2.5 text-center">
+              <div className="eyebrow" style={{fontSize:'.6rem'}}>Avg Stack</div>
+              <div className="digits text-lg font-black text-yellow-400">{avgBB} BB</div>
+              <div className="text-[10px] text-slate-500">{fmt(avgStack)}</div>
+            </div>
+          </div>
+
+          {/* 족보 (항상 표시) */}
+          <HandRankingsPanel />
+        </div>
+
+        {/* ── RIGHT: 테이블 · 은행 · 플레이어 ──────────────────────────────── */}
+        <div className="space-y-3">
+
+          {activePlayers.length===1 && (
+            <div className="panel panel-gold serif text-center text-xl font-black gold-text p-4">
+              ♛ 우승자: {activePlayers[0]?.name}!
+            </div>
+          )}
+
+          {/* 테이블 뷰 */}
+          <div className="panel p-3">
+            <div className="relative w-full mx-auto" style={{aspectRatio:'4 / 3', maxWidth:560}}>
+              <div className="absolute rounded-[50%] felt-table" style={{inset:'14% 12%'}} />
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 pointer-events-none">
+                <div className="eyebrow" style={{color:'rgba(243,220,155,.8)'}}>Hand #{handNo}</div>
+                <button onClick={handleNextHand}
+                  className="btn btn-md bg-yellow-500 hover:bg-yellow-400 text-black font-black pointer-events-auto tracking-wider">
+                  다음 핸드 ▶
+                </button>
+                <div className="text-[10px]" style={{color:'rgba(246,239,220,.55)'}}>딜러 버튼 이동</div>
+              </div>
+              {players.map((p,i)=>{
+                const r = roleOf(p);
+                const ang = Math.PI/2 + (i*2*Math.PI)/players.length;
+                const pos = { left:`${50+40*Math.cos(ang)}%`, top:`${50+38*Math.sin(ang)}%` };
+                return (
+                  <div key={p.id} className="absolute -translate-x-1/2 -translate-y-1/2" style={pos}>
+                    <div className={`rounded-lg px-2 py-1 text-center border min-w-[68px] ${
+                      p.eliminated ? 'bg-slate-900 border-slate-800 opacity-40'
+                      : r.dealer ? 'bg-slate-900 border-yellow-400 shadow-lg shadow-yellow-900/40'
+                      : 'bg-slate-900 border-slate-600'}`}>
+                      <div className={`text-xs font-bold truncate max-w-[76px] ${p.eliminated?'line-through text-slate-500':'text-white'}`}>{p.name}</div>
+                      <div className="flex justify-center gap-0.5 mt-0.5 min-h-[18px]">
+                        {r.dealer && <span className="badge bg-yellow-500 text-black" style={{padding:'0 5px',minWidth:0}}>BTN</span>}
+                        {r.sb && <span className="badge text-white" style={{background:'#2f6f9f',padding:'0 5px',minWidth:0}}>SB</span>}
+                        {r.bb && <span className="badge bg-red-500 text-white" style={{padding:'0 5px',minWidth:0}}>BB</span>}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {activePlayers.length===2 && (
+              <div className="mt-2 text-center text-xs text-yellow-400 font-semibold rounded-lg p-2" style={{background:'rgba(230,195,106,.08)',border:'1px solid rgba(230,195,106,.35)'}}>
+                ♠ 헤즈업! BTN = SB | 나머지 = BB<br />
+                프리플랍: BTN(SB) 먼저 행동 · 플랍 이후: BB 먼저 행동
+              </div>
+            )}
+          </div>
+
+          {/* 은행 칩 */}
+          <div className="panel p-3">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="eyebrow">Bank · 은행 칩</h3>
+              <span className={`text-xs font-bold ${canRebuy?'text-slate-300':'text-red-400'}`}>
+                {canRebuy ? `리바이 ${rebuyCapacity}회 가능` : '리바이 불가 (칩 부족)'}
+              </span>
+            </div>
+            <div className="grid grid-cols-4 gap-2 text-center">
+              {CHIP_TYPES.map(ct=>(
+                <div key={ct.key}>
+                  <span className={`badge ${ct.colorClass}`}>{ct.label}</span>
+                  <div className={`digits font-black text-xl ${bankNow[ct.key]<alloc[ct.key]?'text-red-400':'text-white'}`}>{bankNow[ct.key]}</div>
+                  <div className="text-[10px] text-slate-500">1인분 {alloc[ct.key]}개</div>
+                </div>
+              ))}
+            </div>
+            <div className="text-[11px] text-slate-400 mt-2 text-center">
+              1인 스택 {fmt(chipValue(alloc))} · 리바이 시 위 개수만큼 은행에서 지급
+            </div>
+          </div>
+
+          {/* 플레이어 관리 */}
+          <div className="space-y-2">
+            {players.map(p=>(
+              <div key={p.id} className={`flex items-center gap-2 rounded-lg px-3 py-2 border ${p.eliminated?'bg-slate-900 border-slate-800':'panel'}`}>
+                <div className="flex-1 min-w-0">
+                  <div className={`font-bold text-sm truncate ${p.eliminated?'text-slate-500 line-through':'text-white'}`}>{p.name}</div>
+                  <div className="text-xs text-slate-400">
+                    바이인 {p.buyIns}회 · <span className="text-yellow-400 font-bold">{fmt(p.buyIns*20000)}</span>
+                  </div>
+                </div>
+                {p.eliminated ? (
+                  <>
+                    <button onClick={()=>handleRebuy(p.id)} disabled={!canRebuy}
+                      className="btn btn-sm bg-violet-600 hover:bg-violet-500 text-white text-xs disabled:opacity-40 disabled:cursor-not-allowed">
+                      리바이인
+                    </button>
+                    <button onClick={()=>handleEliminate(p.id)}
+                      className="btn btn-sm bg-slate-600 hover:bg-slate-500 text-white text-xs">
+                      ↩ 취소
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={()=>handleRebuy(p.id)} disabled={!canRebuy}
+                      className="btn btn-sm bg-violet-600 hover:bg-violet-500 text-white text-xs disabled:opacity-40 disabled:cursor-not-allowed">
+                      +리바이
+                    </button>
+                    <button onClick={()=>handleEliminate(p.id)}
+                      className="btn btn-sm bg-slate-600 hover:bg-slate-500 text-white text-xs">
+                      탈락
+                    </button>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── BOTTOM BAR ──────────────────────────────────────────────────────── */}
+      <div className="sticky bottom-0 bg-slate-900 p-3 flex flex-wrap gap-2 justify-center" style={{borderTop:'1px solid rgba(230,195,106,.35)',backdropFilter:'blur(6px)'}}>
+        <button onClick={()=>setModal('hand')}
+          className="btn btn-md bg-indigo-700 hover:bg-indigo-600 text-white text-sm">
+          ♠ 패 순위
+        </button>
+        <button onClick={()=>setModal('gto')}
+          className="btn btn-md bg-emerald-700 hover:bg-emerald-600 text-white text-sm">
+          ♣ GTO 차트
+        </button>
+        <button onClick={()=>setModal('settle')}
+          className="btn btn-md bg-violet-700 hover:bg-violet-600 text-white text-sm font-bold">
+          ♛ 게임 종료 / 정산
+        </button>
+        <button onClick={handleHome}
+          className="btn btn-md bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm">
+          ↩ 처음으로
+        </button>
+      </div>
+
+      {/* ── MODALS ──────────────────────────────────────────────────────────── */}
+      {modal==='hand'    && <HandRankingsModal onClose={()=>setModal(null)} />}
+      {modal==='gto'     && <PreflopChartModal onClose={()=>setModal(null)} />}
+      {modal==='settle'  && <SettlementModal   players={players} onClose={()=>setModal(null)} />}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
